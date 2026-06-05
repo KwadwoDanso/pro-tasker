@@ -1,0 +1,585 @@
+/* =========================================================================
+   Pro-Tasker — continuous theme + prominent glassmorphism
+   THEME FIX: --mode is a 0-100% variable on <html>. Every color token below
+   is computed with color-mix() between a light and a dark endpoint, weighted
+   by --mode. Dragging the Theme slider re-blends all tokens in 1% steps, so
+   the whole UI glides smoothly from white to near-black (no snap at 50%).
+   ========================================================================= */
+
+:root {
+    --mode: 0%;
+    /* set live by ThemeContext: 0% = light, 100% = dark */
+
+    /* ---- light / dark endpoints ---- */
+    --bg-l: #e9eefb;
+    --bg-d: #04050a;
+    --surface-l: #ffffff;
+    --surface-d: #0b0e16;
+    --text-l: #101522;
+    --text-d: #f4f7ff;
+    --soft-l: #5a6781;
+    --soft-d: #a9b4ca;
+    --border-l: rgba(18, 28, 55, .10);
+    --border-d: rgba(255, 255, 255, .14);
+    --glass-l: rgba(255, 255, 255, .46);
+    --glass-d: rgba(17, 21, 33, .40);
+    --gbrd-l: rgba(255, 255, 255, .75);
+    --gbrd-d: rgba(255, 255, 255, .16);
+    --neuhi-l: rgba(255, 255, 255, .95);
+    --neuhi-d: rgba(255, 255, 255, .045);
+    --neulo-l: rgba(150, 165, 200, .50);
+    --neulo-d: rgba(0, 0, 0, .65);
+
+    /* ---- computed tokens (smoothly blended by --mode) ---- */
+    --bg: color-mix(in srgb, var(--bg-l), var(--bg-d) var(--mode));
+    --surface: color-mix(in srgb, var(--surface-l), var(--surface-d)var(--mode));
+    --text: color-mix(in srgb, var(--text-l), var(--text-d) var(--mode));
+    --text-soft: color-mix(in srgb, var(--soft-l), var(--soft-d) var(--mode));
+    --border: color-mix(in srgb, var(--border-l), var(--border-d) var(--mode));
+    --glass: color-mix(in srgb, var(--glass-l), var(--glass-d) var(--mode));
+    --glass-brd: color-mix(in srgb, var(--gbrd-l), var(--gbrd-d) var(--mode));
+    --neu-hi: color-mix(in srgb, var(--neuhi-l), var(--neuhi-d) var(--mode));
+    --neu-lo: color-mix(in srgb, var(--neulo-l), var(--neulo-d) var(--mode));
+
+    --primary: #6366f1;
+    --primary-2: #a855f7;
+    --on-primary: #fff;
+    --danger: #ef4444;
+
+    --radius: 20px;
+    --radius-sm: 12px;
+    --maxw: 980px;
+    --blur: 24px;
+    /* prominent frost */
+    --neu-out: 8px 8px 22px var(--neu-lo), -8px -8px 18px var(--neu-hi);
+    --neu-in: inset 6px 6px 14px var(--neu-lo), inset -6px -6px 14px var(--neu-hi);
+    --glow: 0 14px 48px rgba(10, 12, 30, .20), inset 0 1px 0 rgba(255, 255, 255, .28);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    background:
+        radial-gradient(58vw 52vh at 12% -12%, rgba(168, 85, 247, .42), transparent 60%),
+        radial-gradient(52vw 48vh at 112% 8%, rgba(99, 102, 241, .45), transparent 58%),
+        radial-gradient(46vw 42vh at 50% 124%, rgba(34, 211, 238, .30), transparent 62%),
+        var(--bg);
+    background-attachment: fixed;
+}
+
+/* immersive slow drift behind the glass (off for reduced motion) */
+body::before {
+    content: "";
+    position: fixed;
+    inset: -20vmax;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(40vmax 40vmax at 20% 30%, rgba(168, 85, 247, .16), transparent 60%),
+        radial-gradient(36vmax 36vmax at 80% 70%, rgba(56, 189, 248, .14), transparent 60%);
+    animation: drift 26s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+    from {
+        transform: translate3d(-3%, -2%, 0)
+    }
+
+    to {
+        transform: translate3d(3%, 2%, 0)
+    }
+}
+
+a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ---- buttons (neumorphic gradient) ---- */
+button {
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 9px 17px;
+    color: var(--on-primary);
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    box-shadow: 0 8px 20px rgba(99, 102, 241, .32);
+    transition: transform .08s ease, filter .15s ease, box-shadow .15s ease;
+}
+
+button:hover {
+    filter: brightness(1.06);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+button.danger {
+    background: linear-gradient(135deg, var(--danger), #f97316);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(239, 68, 68, .30);
+}
+
+.link-btn,
+button.link-btn {
+    background: none;
+    color: var(--primary);
+    box-shadow: none;
+    border: none;
+    padding: 5px 4px;
+}
+
+.link-btn:hover {
+    filter: none;
+    text-decoration: underline;
+}
+
+input,
+select {
+    font: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: color-mix(in srgb, var(--surface), transparent 18%);
+    padding: 10px 13px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+input::placeholder {
+    color: var(--text-soft);
+}
+
+:where(a, button, input, select):focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* ---- shared GLASS surface ---- */
+.navbar,
+.form-card,
+.card,
+.task,
+.theme-card,
+.workload {
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
+    backdrop-filter: blur(var(--blur)) saturate(150%);
+    border: 1px solid var(--glass-brd);
+}
+
+/* ---- shell + night overlay ---- */
+.shell {
+    min-height: 100vh;
+}
+
+.night-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* ---- header / navbar ---- */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px clamp(14px, 4vw, 22px);
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--glow);
+}
+
+.brand {
+    font-weight: 800;
+    font-size: clamp(17px, 2.4vw, 20px);
+    color: var(--text);
+    letter-spacing: .2px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.nav-user {
+    color: var(--text-soft);
+    font-size: 14px;
+}
+
+/* ---- theme controls (popover, upper right) ---- */
+.theme-wrap {
+    position: relative;
+}
+
+.theme-trigger {
+    background: color-mix(in srgb, var(--surface), transparent 20%);
+    color: var(--text);
+    box-shadow: none;
+    border: 1px solid var(--glass-brd);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+.theme-card {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 40;
+    width: min(260px, 86vw);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    border-radius: var(--radius);
+    box-shadow: var(--glow);
+}
+
+.theme-row__label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 7px;
+}
+
+/* gradient sliders */
+.slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 9px;
+    border-radius: 999px;
+    cursor: pointer;
+    outline-offset: 4px;
+    border: 1px solid var(--border);
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--primary);
+    box-shadow: 0 2px 7px rgba(0, 0, 0, .35);
+    cursor: grab;
+}
+
+.slider::-moz-range-thumb {
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--primary);
+    box-shadow: 0 2px 7px rgba(0, 0, 0, .35);
+    cursor: grab;
+}
+
+/* ---- layout ---- */
+.container {
+    max-width: var(--maxw);
+    margin: clamp(18px, 4vw, 30px) auto;
+    padding: 0 clamp(14px, 4vw, 20px);
+}
+
+h1 {
+    font-size: clamp(26px, 5vw, 40px);
+}
+
+h2 {
+    font-size: clamp(20px, 3.4vw, 28px);
+    margin-bottom: 14px;
+}
+
+h3 {
+    font-size: clamp(16px, 2.6vw, 20px);
+    margin-bottom: 10px;
+}
+
+/* ---- auth card (glass hero) ---- */
+.form-card {
+    max-width: 400px;
+    margin: 7vh auto;
+    padding: clamp(22px, 5vw, 30px);
+    border-radius: var(--radius);
+    box-shadow: var(--glow);
+}
+
+.form-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+.inline-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 16px 0;
+}
+
+.inline-form input {
+    flex: 1;
+    min-width: 160px;
+}
+
+.task-form {
+    align-items: flex-start;
+}
+
+/* optional task details */
+.task-details {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 6px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--text-soft);
+    font-weight: 600;
+}
+
+.field input {
+    min-width: 170px;
+}
+
+/* ---- project grid + cards ---- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+    gap: 18px;
+}
+
+.card {
+    padding: 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--glow);
+    transition: transform .14s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.card h3 {
+    color: var(--text);
+}
+
+.card p {
+    color: var(--text-soft);
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+/* ---- workload gauge ---- */
+.workload {
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--glow);
+    margin-bottom: 16px;
+}
+
+.workload__head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+.workload__bar {
+    height: 9px;
+    border-radius: 999px;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.workload__fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #22c55e, #6366f1);
+    transition: width .25s ease;
+}
+
+.workload--over .workload__fill {
+    background: linear-gradient(90deg, #f59e0b, #ef4444);
+}
+
+.workload__warn {
+    margin-top: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #b45309;
+}
+
+/* ---- tasks ---- */
+.task {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--glow);
+}
+
+.task-main {
+    flex: 1;
+    min-width: 130px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.task-title {
+    color: var(--text);
+}
+
+.task-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-soft);
+}
+
+/* solid status pills read on any --mode */
+.status {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 11px;
+    border-radius: 999px;
+    color: #fff;
+    background: #64748b;
+}
+
+.status-in-progress {
+    background: #f59e0b;
+    color: #241a05;
+}
+
+.status-done {
+    background: #22c55e;
+    color: #062213;
+}
+
+.error {
+    color: var(--danger);
+    font-weight: 600;
+    margin: 10px 0;
+}
+
+/* ---- responsive ---- */
+@media (max-width: 640px) {
+    .navbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .nav-links {
+        justify-content: space-between;
+    }
+
+    .inline-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .inline-form input {
+        width: 100%;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .field input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .task {
+        gap: 8px;
+    }
+
+    .task select,
+    .task .danger {
+        flex: 1;
+    }
+}
+
+@media (max-width: 420px) {
+    .theme-card {
+        width: 86vw;
+    }
+
+    .status {
+        order: -1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    body::before {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .card:hover {
+        transform: none;
+    }
+}
