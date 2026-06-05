@@ -12,8 +12,27 @@ connectDB();
 
 const app = express();
 
-// Middleware
-app.use(cors({ origin: process.env.CLIENT_URL || '*' }));
+// CORS: allow local dev + the deployed Render frontend
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://pro-tasker-2.onrender.com',
+];
+// Also honor a CLIENT_URL env var if you set one (optional now)
+if (process.env.CLIENT_URL) allowedOrigins.push(process.env.CLIENT_URL);
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        // allow non-browser tools (curl, server-to-server) that send no origin
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            return callback(new Error('Not allowed by CORS'), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Health check
